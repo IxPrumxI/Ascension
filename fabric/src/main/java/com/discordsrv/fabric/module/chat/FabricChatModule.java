@@ -20,7 +20,6 @@ package com.discordsrv.fabric.module.chat;
 
 import com.discordsrv.api.events.message.receive.game.GameChatMessageReceiveEvent;
 import com.discordsrv.common.feature.channel.global.GlobalChannel;
-import com.discordsrv.common.util.ComponentUtil;
 import com.discordsrv.fabric.FabricDiscordSRV;
 import com.discordsrv.fabric.module.AbstractFabricModule;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
@@ -47,7 +46,7 @@ public class FabricChatModule extends AbstractFabricModule {
         discordSRV.eventBus().publish(new GameChatMessageReceiveEvent(
                 null,
                 discordSRV.playerProvider().player(serverPlayerEntity),
-                ComponentUtil.toAPI(discordSRV.getAdventure().asAdventure(signedMessage.getContent())),
+                discordSRV.componentFactory().fromNative(signedMessage.getContent()),
                 new GlobalChannel(discordSRV),
                 false
         ));

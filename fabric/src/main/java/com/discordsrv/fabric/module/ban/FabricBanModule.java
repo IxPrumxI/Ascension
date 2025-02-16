@@ -133,7 +133,7 @@ public class FabricBanModule extends AbstractFabricModule implements PunishmentM
             if (serverPlayerEntity != null) {
                 serverPlayerEntity.networkHandler.disconnect(
                         reason != null
-                            ? discordSRV.getAdventure().asNative(reason.asAdventure())
+                            ? discordSRV.componentFactory().toNative(reason)
                             : Text.translatable("multiplayer.disconnect.banned")
                 );
             }

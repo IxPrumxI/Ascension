@@ -35,12 +35,12 @@ import com.discordsrv.fabric.command.game.FabricGameCommandExecutionHelper;
 import com.discordsrv.fabric.command.game.handler.FabricCommandHandler;
 import com.discordsrv.fabric.config.main.FabricConfig;
 import com.discordsrv.fabric.console.FabricConsole;
+import com.discordsrv.fabric.core.component.FabricComponentFactory;
 import com.discordsrv.fabric.module.ban.FabricBanModule;
 import com.discordsrv.fabric.module.chat.*;
 import com.discordsrv.fabric.player.FabricPlayerProvider;
 import com.discordsrv.fabric.plugin.FabricModManager;
 import com.discordsrv.fabric.requiredlinking.FabricRequiredLinkingModule;
-import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +58,7 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
     private final FabricPlayerProvider playerProvider;
     private final FabricModManager modManager;
     private final FabricCommandHandler commandHandler;
+    private final FabricComponentFactory componentFactory;
 
     private final ConnectionConfigManager<ConnectionConfig> connectionConfigManager;
     private final MainConfigManager<FabricConfig> configManager;
@@ -74,6 +75,7 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
         this.modManager = new FabricModManager();
         this.commandHandler = new FabricCommandHandler(this);
         this.executionHelper = new FabricGameCommandExecutionHelper(this);
+        this.componentFactory = new FabricComponentFactory(this);
 
         // Config
         this.connectionConfigManager = new ConnectionConfigManager<>(this, ConnectionConfig::new);
@@ -119,11 +121,6 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
 
     public MinecraftServer getServer() {
         return bootstrap.getServer();
-    }
-
-    @NotNull
-    public MinecraftServerAudiences getAdventure() {
-        return bootstrap.getAdventure();
     }
 
     @Override
@@ -179,5 +176,10 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
     @Override
     public @Nullable GameCommandExecutionHelper executeHelper() {
         return executionHelper;
+    }
+
+    @Override
+    public @NotNull FabricComponentFactory componentFactory() {
+        return componentFactory;
     }
 }

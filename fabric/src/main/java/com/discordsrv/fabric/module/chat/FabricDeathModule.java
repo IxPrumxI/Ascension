@@ -21,7 +21,6 @@ package com.discordsrv.fabric.module.chat;
 import com.discordsrv.api.component.MinecraftComponent;
 import com.discordsrv.api.events.message.receive.game.DeathMessageReceiveEvent;
 import com.discordsrv.api.player.DiscordSRVPlayer;
-import com.discordsrv.common.util.ComponentUtil;
 import com.discordsrv.fabric.FabricDiscordSRV;
 import com.discordsrv.fabric.module.AbstractFabricModule;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -47,7 +46,7 @@ public class FabricDeathModule extends AbstractFabricModule {
         if (!enabled) return;
         if (livingEntity instanceof ServerPlayerEntity) {
             Text message = damageSource.getDeathMessage(livingEntity);
-            MinecraftComponent minecraftComponent = ComponentUtil.toAPI(discordSRV.getAdventure().asAdventure(message));
+            MinecraftComponent minecraftComponent = discordSRV.componentFactory().fromNative(message);
 
             DiscordSRVPlayer player = discordSRV.playerProvider().player((ServerPlayerEntity) livingEntity);
             discordSRV.eventBus().publish(

@@ -86,10 +86,6 @@ dependencies {
     // Common
     shadow project(':common')
 
-    // Adventure
-    modImplementation(libs.adventure.platform.fabric)
-    include(libs.adventure.platform.fabric)
-
     // Integrations
     modCompileOnly(libs.textplaceholder.fabric)
 

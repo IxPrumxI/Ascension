@@ -94,13 +94,16 @@ public class FabricPlayer extends FabricCommandSender implements IPlayer {
 
     @Override
     public @NotNull Identity identity() {
-        return player.identity();
+        return Identity.identity(player.getUuid());
     }
 
     @Override
     public @NotNull Component displayName() {
-        // Use Adventure's Pointer, otherwise username
-        return player.getOrDefaultFrom(Identity.DISPLAY_NAME, () -> Component.text(player.getName().getString()));
+        if (player.getDisplayName() != null) {
+            return Component.text(player.getDisplayName().getString());
+        } else {
+            return Component.text(player.getName().getString());
+        }
     }
 
     @Override

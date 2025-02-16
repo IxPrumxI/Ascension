@@ -21,7 +21,6 @@ package com.discordsrv.fabric.module.chat;
 import com.discordsrv.api.component.MinecraftComponent;
 import com.discordsrv.api.events.message.receive.game.JoinMessageReceiveEvent;
 import com.discordsrv.api.player.DiscordSRVPlayer;
-import com.discordsrv.common.util.ComponentUtil;
 import com.discordsrv.fabric.FabricDiscordSRV;
 import com.discordsrv.fabric.module.AbstractFabricModule;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -75,6 +74,6 @@ public class FabricJoinModule extends AbstractFabricModule {
             mutableText = Text.translatable("multiplayer.player.joined.renamed", playerEntity.getDisplayName(), playerEntity.getName());
         }
 
-        return ComponentUtil.toAPI(discordSRV.getAdventure().asAdventure(mutableText));
+        return discordSRV.componentFactory().fromNative(mutableText);
     }
 }

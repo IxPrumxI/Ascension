@@ -22,7 +22,6 @@ import com.discordsrv.api.component.MinecraftComponent;
 import com.discordsrv.api.events.message.receive.game.AwardMessageReceiveEvent;
 import com.discordsrv.common.abstraction.player.IPlayer;
 import com.discordsrv.common.core.logging.NamedLogger;
-import com.discordsrv.common.util.ComponentUtil;
 import com.discordsrv.fabric.FabricDiscordSRV;
 import com.discordsrv.fabric.module.AbstractFabricModule;
 import net.minecraft.advancement.Advancement;
@@ -60,9 +59,9 @@ public class FabricAdvancementModule extends AbstractFabricModule {
         AdvancementDisplay display = displayOptional.get();
         AdvancementFrame frame = display.getFrame();
 
-        MinecraftComponent message = ComponentUtil.toAPI(discordSRV.getAdventure().asAdventure(frame.getChatAnnouncementText(advancementEntry, owner)));
-        MinecraftComponent title = ComponentUtil.toAPI(discordSRV.getAdventure().asAdventure(display.getTitle()));
-        MinecraftComponent description = ComponentUtil.toAPI(discordSRV.getAdventure().asAdventure(display.getDescription()));
+        MinecraftComponent message = discordSRV.componentFactory().fromNative(frame.getChatAnnouncementText(advancementEntry, owner));
+        MinecraftComponent title = discordSRV.componentFactory().fromNative(display.getTitle());
+        MinecraftComponent description = discordSRV.componentFactory().fromNative(display.getDescription());
 
         IPlayer player = discordSRV.playerProvider().player(owner);
         discordSRV.eventBus().publish(

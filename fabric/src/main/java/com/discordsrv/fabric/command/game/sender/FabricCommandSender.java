@@ -23,6 +23,10 @@ import com.discordsrv.common.permission.game.Permission;
 import com.discordsrv.fabric.FabricDiscordSRV;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.minecraft.network.message.ChatVisibility;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +53,24 @@ public class FabricCommandSender implements ICommandSender {
 
     @Override
     public @NotNull Audience audience() {
-        return discordSRV.getAdventure().audience(commandSource);
+        return new Audience() {
+            @SuppressWarnings({"UnstableApiUsage", "deprecation"})
+            @Override
+            public void sendMessage(final @NotNull Identity source, final @NotNull Component message, final @NotNull MessageType type) {
+                ChatVisibility visibility = ChatVisibility.FULL;
+                if (commandSource.getPlayer() != null) {
+                    visibility = commandSource.getPlayer().getClientChatVisibility();
+                }
+                final boolean shouldSend = switch (visibility) {
+                    case FULL -> true;
+                    case SYSTEM -> type == MessageType.SYSTEM;
+                    case HIDDEN -> false;
+                };
+
+                if (shouldSend) {
+                    commandSource.sendMessage(discordSRV.componentFactory().toNative(message));
+                }
+            }
+        };
     }
 }
