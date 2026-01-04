@@ -52,6 +52,7 @@ import com.discordsrv.common.config.main.linking.LinkedAccountConfig;
 import com.discordsrv.common.config.messages.MessagesConfig;
 import com.discordsrv.common.core.component.ComponentFactory;
 import com.discordsrv.common.core.component.translation.TranslationLoader;
+import com.discordsrv.common.core.debug.data.VersionInfo;
 import com.discordsrv.common.core.dependency.DiscordSRVDependencyManager;
 import com.discordsrv.common.core.eventbus.EventBusImpl;
 import com.discordsrv.common.core.logging.Logger;
@@ -63,9 +64,11 @@ import com.discordsrv.common.core.placeholder.PlaceholderServiceImpl;
 import com.discordsrv.common.core.placeholder.context.*;
 import com.discordsrv.common.core.placeholder.format.DiscordMarkdownFormatImpl;
 import com.discordsrv.common.core.placeholder.result.ComponentResultStringifier;
+import com.discordsrv.common.core.profile.ProfileManagerImpl;
 import com.discordsrv.common.core.storage.Storage;
 import com.discordsrv.common.core.storage.StorageType;
 import com.discordsrv.common.core.storage.impl.MemoryStorage;
+import com.discordsrv.common.core.update.UpdateChecker;
 import com.discordsrv.common.discord.api.DiscordAPIEventModule;
 import com.discordsrv.common.discord.api.DiscordAPIImpl;
 import com.discordsrv.common.discord.connection.DiscordConnectionManager;
@@ -76,13 +79,13 @@ import com.discordsrv.common.exception.StorageException;
 import com.discordsrv.common.feature.DiscordInviteModule;
 import com.discordsrv.common.feature.PlayerListModule;
 import com.discordsrv.common.feature.PresenceUpdaterModule;
+import com.discordsrv.common.feature.WorldChannelModule;
 import com.discordsrv.common.feature.bansync.BanSyncModule;
 import com.discordsrv.common.feature.channel.ChannelLockingModule;
 import com.discordsrv.common.feature.channel.ChannelUpdaterModule;
 import com.discordsrv.common.feature.channel.global.GlobalChannelLookupModule;
 import com.discordsrv.common.feature.console.ConsoleModule;
 import com.discordsrv.common.feature.customcommands.CustomCommandModule;
-import com.discordsrv.common.core.debug.data.VersionInfo;
 import com.discordsrv.common.feature.groupsync.GroupSyncModule;
 import com.discordsrv.common.feature.linking.LinkProvider;
 import com.discordsrv.common.feature.linking.LinkedRoleModule;
@@ -92,14 +95,12 @@ import com.discordsrv.common.feature.linking.impl.MinecraftAuthenticationLinker;
 import com.discordsrv.common.feature.linking.impl.StorageLinker;
 import com.discordsrv.common.feature.mention.MentionCachingModule;
 import com.discordsrv.common.feature.mention.MentionGameRenderingModule;
-import com.discordsrv.common.feature.messageforwarding.discord.DiscordToMinecraftChatModule;
 import com.discordsrv.common.feature.messageforwarding.discord.DiscordMessageMirroringModule;
+import com.discordsrv.common.feature.messageforwarding.discord.DiscordToMinecraftChatModule;
 import com.discordsrv.common.feature.messageforwarding.game.*;
 import com.discordsrv.common.feature.mutesync.MuteSyncModule;
 import com.discordsrv.common.feature.nicknamesync.NicknameSyncModule;
-import com.discordsrv.common.core.profile.ProfileManagerImpl;
 import com.discordsrv.common.feature.onlinerole.OnlineRoleModule;
-import com.discordsrv.common.core.update.UpdateChecker;
 import com.discordsrv.common.helper.ChannelConfigHelper;
 import com.discordsrv.common.helper.DestinationLookupHelper;
 import com.discordsrv.common.helper.TemporaryLocalData;
@@ -179,7 +180,7 @@ public abstract class AbstractDiscordSRV<
     private ChannelConfigHelper channelConfig;
     private DestinationLookupHelper destinationLookupHelper;
     private TemporaryLocalData temporaryLocalData;
-    protected TranslationLoader translationLoader;
+    private TranslationLoader translationLoader;
 
     private Storage storage;
     private LinkProvider linkProvider;
@@ -223,6 +224,7 @@ public abstract class AbstractDiscordSRV<
         this.destinationLookupHelper = new DestinationLookupHelper(this);
         this.temporaryLocalData = new TemporaryLocalData(this);
         this.updateChecker = new UpdateChecker(this);
+        this.translationLoader = new TranslationLoader(this);
         readManifest();
 
         ///////////////////////////////////////////////////////////////
@@ -692,8 +694,6 @@ public abstract class AbstractDiscordSRV<
         // Register PlayerProvider listeners
         playerProvider().subscribe();
 
-        if (this.translationLoader == null) this.translationLoader = new TranslationLoader(this);
-
         // Placeholder service stuff
         placeholderService().addResultMapper(new ComponentResultStringifier(this));
 
@@ -746,6 +746,7 @@ public abstract class AbstractDiscordSRV<
         registerModule(JoinMessageModule::new);
         registerModule(LeaveMessageModule::new);
         registerModule(DiscordInviteModule::new);
+        registerModule(WorldChannelModule::new);
         registerModule(MentionCachingModule::new);
         registerModule(LinkingModule::new);
         registerModule(PresenceUpdaterModule::new);
@@ -764,7 +765,7 @@ public abstract class AbstractDiscordSRV<
             registerModule(ServerSwitchMessageModule::new);
         }
         if (serverType() == ServerType.SERVER) {
-            registerModule(AwardMessageModule::new);
+            registerModule(AdvancementMessageModule::new);
             registerModule(DeathMessageModule::new);
         }
 
@@ -995,8 +996,8 @@ public abstract class AbstractDiscordSRV<
             results.addAll(moduleManager().reload());
         }
 
-        if (translationLoader != null && flags.contains(ReloadFlag.TRANSLATIONS)) {
-            translationLoader.reload();
+        if (flags.contains(ReloadFlag.TRANSLATION)) {
+            this.translationLoader.reload();
         }
 
         if (flags.contains(ReloadFlag.DISCORD_COMMANDS) && isReady()) {

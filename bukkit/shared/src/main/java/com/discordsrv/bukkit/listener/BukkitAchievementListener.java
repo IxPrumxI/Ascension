@@ -19,7 +19,7 @@
 package com.discordsrv.bukkit.listener;
 
 import com.discordsrv.api.component.MinecraftComponent;
-import com.discordsrv.api.events.message.preprocess.game.AwardMessagePreProcessEvent;
+import com.discordsrv.api.events.message.preprocess.game.AdvancementMessagePreProcessEvent;
 import com.discordsrv.bukkit.BukkitDiscordSRV;
 import com.discordsrv.bukkit.debug.EventObserver;
 import com.discordsrv.common.abstraction.player.IPlayer;
@@ -31,6 +31,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerAchievementAwardedEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
 
 public class BukkitAchievementListener extends AbstractBukkitListener<PlayerAchievementAwardedEvent> {
 
@@ -50,7 +52,7 @@ public class BukkitAchievementListener extends AbstractBukkitListener<PlayerAchi
 
         IPlayer player = discordSRV.playerProvider().player(event.getPlayer());
         discordSRV.eventBus().publish(
-                new AwardMessagePreProcessEvent(
+                new AdvancementMessagePreProcessEvent(
                         event,
                         player,
                         null,
@@ -68,5 +70,10 @@ public class BukkitAchievementListener extends AbstractBukkitListener<PlayerAchi
     @Override
     protected void observeEvents(boolean enable) {
         observer = observeEvent(observer, PlayerAchievementAwardedEvent.class, PlayerAchievementAwardedEvent::isCancelled, enable);
+    }
+
+    @Override
+    protected void collectRelevantHandlerLists(Consumer<Class<?>> eventClassConsumer) {
+        eventClassConsumer.accept(PlayerAchievementAwardedEvent.class);
     }
 }

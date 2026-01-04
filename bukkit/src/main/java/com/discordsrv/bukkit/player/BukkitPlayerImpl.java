@@ -21,12 +21,17 @@ package com.discordsrv.bukkit.player;
 import com.discordsrv.api.task.Task;
 import com.discordsrv.bukkit.BukkitDiscordSRV;
 import com.discordsrv.bukkit.component.PaperComponentHandle;
+import com.discordsrv.bukkit.gamerule.GameRule;
 import com.discordsrv.common.abstraction.player.provider.model.SkinInfo;
 import com.discordsrv.common.util.ComponentUtil;
+import com.discordsrv.common.util.ReflectionUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -89,6 +94,38 @@ public class BukkitPlayerImpl extends BukkitPlayer {
         if (SpigotPlayerUtil.LOCALE_AVAILABLE) {
             return Locale.forLanguageTag(SpigotPlayerUtil.getLocale(player));
         }
+        return null;
+    }
+
+    @Override
+    public @NonNull String worldName() {
+        return player.getWorld().getName();
+    }
+
+    @Override
+    public @Nullable String worldNamespace() {
+        if (SpigotWorldUtil.WORLD_NAMESPACE_AVAILABLE) {
+            Key key = SpigotWorldUtil.getWorldKey(player.getWorld());
+            return key.namespace();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getGameRuleValueForCurrentWorld(GameRule<T> gameRule) {
+        World world = player.getWorld();
+        if (ReflectionUtil.classExists("org.bukkit.GameRule")) {
+            return PaperPlayerUtil.getGameRuleValue(world, gameRule);
+        }
+
+        for (String option : gameRule.getOptions()) {
+            String value = world.getGameRuleValue(option);
+            if (gameRule.getType().equals(Boolean.class)) {
+                return (T) Boolean.valueOf(value);
+            }
+        }
+
         return null;
     }
 

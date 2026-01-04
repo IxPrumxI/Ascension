@@ -20,27 +20,27 @@ package com.discordsrv.common.core.component.translation;
 
 import com.discordsrv.common.DiscordSRV;
 import com.discordsrv.common.core.logging.NamedLogger;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.translation.TranslationStore;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Stream;
 
 public class TranslationLoader {
 
     protected final DiscordSRV discordSRV;
     protected final NamedLogger logger;
+    private TranslationStore<MessageFormat> currentTranslationStore;
 
     public TranslationLoader(DiscordSRV discordSRV) {
         this.discordSRV = discordSRV;
@@ -49,26 +49,26 @@ public class TranslationLoader {
 
     public void reload() {
         try {
-            TranslationRegistry registry = discordSRV.componentFactory().translationRegistry();
-            registry.clear();
-
-            AtomicBoolean any = new AtomicBoolean(false);
+            TranslationStore<MessageFormat> translationStore = TranslationStore.messageFormat(Key.key("discordsrv", "user-defined"));
 
             Path languages = discordSRV.dataDirectory().resolve("game_languages");
             if (Files.exists(languages)) {
-                loadFromFiles(languages, registry, any);
+                loadFromFiles(languages, translationStore);
             }
-            loadMCTranslations(any);
 
-            if (!any.get()) {
-                logger.warning("No Minecraft translations were found, some components may not render correctly");
+            // Remove our previous store
+            if (currentTranslationStore != null) {
+                discordSRV.componentFactory().translators().remove(currentTranslationStore);
             }
+
+            currentTranslationStore = translationStore;
+            discordSRV.componentFactory().translators().add(0, translationStore);
         } catch (Throwable t) {
             logger.error("Failed to reload languages", t);
         }
     }
 
-    protected void loadFromFiles(Path folder, TranslationRegistry registry, AtomicBoolean any) throws IOException {
+    protected void loadFromFiles(Path folder, TranslationStore<MessageFormat> translationStore) throws IOException {
         try (Stream<Path> paths = Files.list(folder)) {
             paths.forEach(path -> {
                 String fileName = path.getFileName().toString();
@@ -84,16 +84,15 @@ public class TranslationLoader {
                     Locale locale = Locale.forLanguageTag(language);
                     URL url = path.toUri().toURL();
 
-                    Map<String, Translation> translations = null;
+                    Map<String, MessageFormat> translations;
                     if (extension.equalsIgnoreCase("json")) {
                         translations = getFromJson(url);
-                    } else if (extension.equalsIgnoreCase("lang")) {
+                    } else {
                         translations = getFromProperties(url);
                     }
                     if (translations != null && !translations.isEmpty()) {
-                        registry.register(locale, translations);
+                        translationStore.registerAll(locale, translations);
                         logger.debug("Loaded " + translations.size() + " translations for " + locale);
-                        any.set(true);
                     }
                 } catch (Throwable t) {
                     logger.warning("Failed to read language file " + fileName, t);
@@ -102,97 +101,28 @@ public class TranslationLoader {
         }
     }
 
-    protected Map<String, Translation> getFromProperties(URL url) throws IOException {
-        Map<String, Translation> translations = new HashMap<>();
+    protected Map<String, MessageFormat> getFromProperties(URL url) throws IOException {
+        Map<String, MessageFormat> translations = new HashMap<>();
 
         Properties properties = new Properties();
         try (InputStream inputStream = url.openStream()) {
             properties.load(inputStream);
         }
 
-        properties.forEach((k, v) -> translations.put((String) k, Translation.stringFormat((String) v)));
+        properties.forEach((k, v) -> translations.put((String) k, new MessageFormat((String) v)));
 
         return translations;
     }
 
-    protected Map<String, Translation> getFromJson(URL url) throws IOException {
-        Map<String, Translation> translations = new HashMap<>();
+    protected Map<String, MessageFormat> getFromJson(URL url) throws IOException {
+        Map<String, MessageFormat> translations = new HashMap<>();
 
         JsonNode node = discordSRV.json().readTree(url);
         node.fields().forEachRemaining(entry -> translations.put(
                 entry.getKey(),
-                Translation.stringFormat(entry.getValue().textValue()))
+                new MessageFormat(entry.getValue().textValue()))
         );
 
         return translations;
-    }
-
-    protected Map<String, Translation> getFromJson(InputStream inputStream) throws IOException {
-        Map<String, Translation> translations = new HashMap<>();
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            JsonNode root;
-
-            try {
-                root = discordSRV.json().readTree(reader);
-            } catch (JsonProcessingException e) {
-                logger.debug("Skipping JSON file due to parse error - " + e.getMessage());
-                return translations;
-            }
-
-            Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                try {
-                    translations.put(
-                            entry.getKey(),
-                            Translation.stringFormat(entry.getValue().textValue())
-                    );
-                } catch (Exception e) {
-                    logger.debug("Skipping invalid translation entry: " + entry, e);
-                }
-            }
-        }
-
-        return translations;
-    }
-
-    protected URL findResource(String name) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL url = null;
-        while (classLoader != null && url == null) {
-            url = classLoader.getResource(name);
-            classLoader = classLoader.getParent();
-        }
-        return url;
-    }
-
-    protected void loadMCTranslations(AtomicBoolean any) {
-        Map<String, Translation> translations = new HashMap<>();
-        try {
-            URL enUS = findResource("assets/minecraft/lang/en_US.lang");
-            if (enUS == null) {
-                enUS = findResource("assets/minecraft/lang/en_us.lang");
-            }
-            if (enUS != null) {
-                translations = getFromProperties(enUS);
-            }
-        } catch (Throwable t) {
-            logger.debug("Failed to load locale", t);
-        }
-        try {
-            URL enUS = findResource("assets/minecraft/lang/en_us.json");
-            if (enUS != null) {
-                translations = getFromJson(enUS);
-            }
-        } catch (Throwable t) {
-            logger.debug("Failed to load locale", t);
-        }
-
-        if (!translations.isEmpty()) {
-            discordSRV.componentFactory().translationRegistry().register(Locale.US, translations);
-            logger.debug("Found " + translations.size() + " Minecraft translations for en_us");
-            any.set(true);
-        }
     }
 }

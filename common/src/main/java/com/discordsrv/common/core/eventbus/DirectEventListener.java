@@ -16,14 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.discordsrv.common.core.component.translation;
+package com.discordsrv.common.core.eventbus;
 
-@FunctionalInterface
-public interface Translation {
+import java.util.function.Consumer;
 
-    static Translation stringFormat(String format) {
-        return new StringFormatTranslation(format);
+public class DirectEventListener<E> extends AbstractEventListener<E> {
+
+    private final Consumer<E> listener;
+
+    public DirectEventListener(
+            Class<E> eventClass,
+            boolean ignoreCanceled,
+            boolean ignoreProcessed,
+            byte priority,
+            Consumer<E> listener
+    ) {
+        super(eventClass, ignoreCanceled, ignoreProcessed, priority);
+        this.listener = listener;
     }
 
-    String translate(Object[] arguments);
+    @Override
+    public void invoke(E event) throws Throwable {
+        listener.accept(event);
+    }
+
+    public String listenerClassName() {
+        return listener.getClass().getName();
+    }
+
+    @Override
+    public String toString() {
+        return "DirectEventListener{listener=" + listenerClassName() + "}";
+    }
 }

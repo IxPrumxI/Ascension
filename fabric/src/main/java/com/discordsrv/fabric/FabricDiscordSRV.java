@@ -28,13 +28,15 @@ import com.discordsrv.common.config.configurate.manager.MessagesConfigManager;
 import com.discordsrv.common.config.configurate.manager.abstraction.ServerConfigManager;
 import com.discordsrv.common.config.connection.ConnectionConfig;
 import com.discordsrv.common.config.messages.MessagesConfig;
-import com.discordsrv.common.core.scheduler.StandardScheduler;
 import com.discordsrv.common.core.debug.data.OnlineMode;
+import com.discordsrv.common.core.scheduler.StandardScheduler;
 import com.discordsrv.common.feature.messageforwarding.game.MinecraftToDiscordChatModule;
 import com.discordsrv.fabric.command.game.FabricGameCommandExecutionHelper;
 import com.discordsrv.fabric.command.game.handler.FabricCommandHandler;
+import com.discordsrv.fabric.component.FabricTranslator;
 import com.discordsrv.fabric.config.main.FabricConfig;
 import com.discordsrv.fabric.console.FabricConsole;
+import com.discordsrv.fabric.module.FabricWorldChannelLookupModule;
 import com.discordsrv.fabric.module.ban.FabricBanModule;
 import com.discordsrv.fabric.module.chat.*;
 import com.discordsrv.fabric.player.FabricPlayerProvider;
@@ -43,7 +45,6 @@ import com.discordsrv.fabric.requiredlinking.FabricRequiredLinkingModule;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,12 +91,13 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
 
     @Override
     protected void enable() throws Throwable {
-        this.translationLoader = new FabricTranslationLoader(this);
+        componentFactory().translators().add(new FabricTranslator(this));
 
         super.enable();
 
         // Chat
         registerModule(MinecraftToDiscordChatModule::new);
+        registerModule(FabricWorldChannelLookupModule::new);
         registerModule(FabricChatModule::new);
         registerModule(FabricDeathModule::new);
         registerModule(FabricJoinModule::new);
@@ -111,14 +113,6 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
         // Integrations
         registerIntegration("com.discordsrv.fabric.integration.FabricLuckPermsIntegration");
         registerIntegration("com.discordsrv.fabric.integration.TextPlaceholderIntegration");
-
-        this.translationLoader.reload();
-        //? if minecraft: >=1.21.9 {
-        net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(PackType.SERVER_DATA).registerReloader(FabricComponentFactory.IDENTIFIER, componentFactory);
-        net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(PackType.SERVER_DATA).addReloaderOrdering(net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys.AFTER_VANILLA, FabricComponentFactory.IDENTIFIER);
-        //?} else {
-        /*net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(componentFactory);
-        *///?}
     }
 
     @Override
@@ -195,10 +189,6 @@ public class FabricDiscordSRV extends AbstractDiscordSRV<DiscordSRVFabricBootstr
     @Override
     public @NotNull FabricComponentFactory componentFactory() {
         return componentFactory;
-    }
-
-    public @NotNull FabricTranslationLoader translationLoader() {
-        return (FabricTranslationLoader) translationLoader;
     }
 
     /**

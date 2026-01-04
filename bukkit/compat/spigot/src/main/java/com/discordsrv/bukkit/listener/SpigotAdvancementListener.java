@@ -19,13 +19,13 @@
 package com.discordsrv.bukkit.listener;
 
 import com.discordsrv.api.component.MinecraftComponent;
-import com.discordsrv.api.events.message.preprocess.game.AwardMessagePreProcessEvent;
+import com.discordsrv.api.events.message.preprocess.game.AdvancementMessagePreProcessEvent;
 import com.discordsrv.bukkit.BukkitDiscordSRV;
-import com.discordsrv.common.abstraction.player.IPlayer;
+import com.discordsrv.bukkit.gamerule.GameRule;
+import com.discordsrv.bukkit.player.BukkitPlayer;
 import com.discordsrv.common.core.logging.NamedLogger;
 import com.discordsrv.common.util.ComponentUtil;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
-import org.bukkit.GameRule;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementDisplay;
 import org.bukkit.event.EventHandler;
@@ -35,6 +35,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @ApiStatus.AvailableSince("Spigot 1.19")
 public class SpigotAdvancementListener extends AbstractBukkitListener<PlayerAdvancementDoneEvent> {
@@ -50,7 +51,9 @@ public class SpigotAdvancementListener extends AbstractBukkitListener<PlayerAdva
 
     @Override
     protected void handleEvent(@NotNull PlayerAdvancementDoneEvent event, Void __) {
-        Boolean gameRuleValue = event.getPlayer().getWorld().getGameRuleValue(GameRule.ANNOUNCE_ADVANCEMENTS);
+        BukkitPlayer player = discordSRV.playerProvider().player(event.getPlayer());
+
+        Boolean gameRuleValue = player.getGameRuleValueForCurrentWorld(GameRule.SHOW_ADVANCEMENT_MESSAGES);
         if (Objects.equals(gameRuleValue, false)) {
             logger().trace("Skipping forwarding advancement, disabled by gamerule");
             return;
@@ -66,15 +69,15 @@ public class SpigotAdvancementListener extends AbstractBukkitListener<PlayerAdva
 
         MinecraftComponent title = ComponentUtil.toAPI(BukkitComponentSerializer.legacy().deserialize(display.getTitle()));
         MinecraftComponent description = ComponentUtil.toAPI(BukkitComponentSerializer.legacy().deserialize(display.getDescription()));
-        IPlayer srvPlayer = discordSRV.playerProvider().player(event.getPlayer());
+
         discordSRV.eventBus().publish(
-                new AwardMessagePreProcessEvent(
+                new AdvancementMessagePreProcessEvent(
                         event,
-                        srvPlayer,
+                        player,
                         null,
                         title,
                         description,
-                        AwardMessagePreProcessEvent.AdvancementFrame.valueOf(display.getType().toString()),
+                        AdvancementMessagePreProcessEvent.AdvancementFrame.fromId(display.getType().toString()),
                         null,
                         false
                 )
@@ -84,4 +87,9 @@ public class SpigotAdvancementListener extends AbstractBukkitListener<PlayerAdva
     // Event is not cancellable
     @Override
     protected void observeEvents(boolean enable) {}
+
+    @Override
+    protected void collectRelevantHandlerLists(Consumer<Class<?>> eventClassConsumer) {
+        eventClassConsumer.accept(PlayerAdvancementDoneEvent.class);
+    }
 }

@@ -16,18 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.discordsrv.common.core.component.translation;
+package com.discordsrv.bukkit.player;
 
-public class StringFormatTranslation implements Translation {
+import net.kyori.adventure.key.Key;
+import org.bukkit.World;
 
-    private final String format;
+public final class SpigotWorldUtil {
 
-    public StringFormatTranslation(String format) {
-        this.format = format;
+    private SpigotWorldUtil() {}
+
+    public static boolean WORLD_NAMESPACE_AVAILABLE = isWorldNamespaceAvailable();
+
+    private static boolean isWorldNamespaceAvailable() {
+        try {
+            World.class.getMethod("getKey");
+            return true;
+        } catch (NoSuchMethodException ignored) {
+            return false;
+        }
     }
 
-    @Override
-    public String translate(Object[] arguments) {
-        return String.format(format, arguments);
+    public static Key getWorldKey(World world) {
+        return Key.key(world.getKey().getNamespace(), world.getKey().getKey());
     }
 }

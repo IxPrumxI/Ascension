@@ -33,26 +33,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An advancement or achievement message was received,
+ * An advancement (or achievement) message was received,
  * DiscordSRV will process it (if enabled, not already processed and not cancelled) at priority {@link com.discordsrv.api.eventbus.EventPriorities#DEFAULT}.
  * <p>
  * Order of events:
  * <ul>
- * <li>{@link com.discordsrv.api.events.message.preprocess.game.AwardMessagePreProcessEvent} (this event)</li>
- * <li>{@link com.discordsrv.api.events.message.postprocess.game.AwardMessagePostProcessEvent}</li>
- * <li>{@link com.discordsrv.api.events.message.post.game.AwardMessagePostEvent}</li>
+ * <li>{@link com.discordsrv.api.events.message.preprocess.game.AdvancementMessagePreProcessEvent} (this event)</li>
+ * <li>{@link com.discordsrv.api.events.message.postprocess.game.AdvancementMessagePostProcessEvent}</li>
+ * <li>{@link com.discordsrv.api.events.message.post.game.AdvancementMessagePostEvent}</li>
  * </ul>
  */
-public class AwardMessagePreProcessEvent extends AbstractGameMessagePreProcessEvent implements PlayerEvent {
+public class AdvancementMessagePreProcessEvent extends AbstractGameMessagePreProcessEvent implements PlayerEvent {
 
     private final DiscordSRVPlayer player;
-    private MinecraftComponent message;
     private MinecraftComponent title;
     private MinecraftComponent description;
     private AdvancementFrame frame;
-    private GameChannel gameChannel;
 
-    public AwardMessagePreProcessEvent(
+    public AdvancementMessagePreProcessEvent(
             @Nullable Object triggeringEvent,
             @NotNull DiscordSRVPlayer player,
             @Nullable MinecraftComponent message,
@@ -65,7 +63,7 @@ public class AwardMessagePreProcessEvent extends AbstractGameMessagePreProcessEv
     }
 
     @ApiStatus.Experimental
-    public AwardMessagePreProcessEvent(
+    public AdvancementMessagePreProcessEvent(
             @Nullable Object triggeringEvent,
             @NotNull DiscordSRVPlayer player,
             @Nullable MinecraftComponent message,
@@ -75,28 +73,17 @@ public class AwardMessagePreProcessEvent extends AbstractGameMessagePreProcessEv
             @Nullable GameChannel gameChannel,
             boolean cancelled
     ) {
-        super(triggeringEvent, cancelled);
+        super(triggeringEvent, cancelled, gameChannel, message);
         this.player = player;
         this.title = title;
-        this.message = message;
         this.description = description;
         this.frame = frame;
-        this.gameChannel = gameChannel;
     }
 
     @Override
     @NotNull
     public DiscordSRVPlayer getPlayer() {
         return player;
-    }
-
-    @Nullable
-    public MinecraftComponent getMessage() {
-        return message;
-    }
-
-    public void setMessage(@Nullable MinecraftComponent message) {
-        this.message = message;
     }
 
     @Nullable
@@ -123,14 +110,6 @@ public class AwardMessagePreProcessEvent extends AbstractGameMessagePreProcessEv
 
     public void setFrame(@Nullable AdvancementFrame frame) {
         this.frame = frame;
-    }
-
-    public GameChannel getGameChannel() {
-        return gameChannel;
-    }
-
-    public void setGameChannel(GameChannel gameChannel) {
-        this.gameChannel = gameChannel;
     }
 
     @Override
@@ -160,6 +139,16 @@ public class AwardMessagePreProcessEvent extends AbstractGameMessagePreProcessEv
 
         public Color color() {
             return color;
+        }
+
+        public static AdvancementFrame fromId(String id) {
+            for (AdvancementFrame frame : values()) {
+                if (frame.id().equalsIgnoreCase(id)) {
+                    return frame;
+                }
+            }
+
+            throw new IllegalArgumentException("Unknown AdvancementFrame id: " + id);
         }
     }
 }

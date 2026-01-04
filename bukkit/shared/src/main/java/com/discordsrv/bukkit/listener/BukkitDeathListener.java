@@ -20,9 +20,9 @@ package com.discordsrv.bukkit.listener;
 
 import com.discordsrv.api.component.MinecraftComponent;
 import com.discordsrv.api.events.message.preprocess.game.DeathMessagePreProcessEvent;
-import com.discordsrv.api.player.DiscordSRVPlayer;
 import com.discordsrv.bukkit.BukkitDiscordSRV;
 import com.discordsrv.bukkit.debug.EventObserver;
+import com.discordsrv.bukkit.player.BukkitPlayer;
 import com.discordsrv.common.core.logging.NamedLogger;
 import com.discordsrv.common.util.ComponentUtil;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
@@ -30,6 +30,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public class BukkitDeathListener extends AbstractBukkitListener<PlayerDeathEvent> {
 
@@ -44,8 +47,10 @@ public class BukkitDeathListener extends AbstractBukkitListener<PlayerDeathEvent
 
     @Override
     protected void handleEvent(@NotNull PlayerDeathEvent event, Void __) {
-        String gameRuleValue = event.getEntity().getWorld().getGameRuleValue("showDeathMessages");
-        if ("false".equals(gameRuleValue)) {
+        BukkitPlayer player = discordSRV.playerProvider().player(event.getEntity());
+
+        Boolean gameRuleValue = player.getGameRuleValueForCurrentWorld(com.discordsrv.bukkit.gamerule.GameRule.SHOW_DEATH_MESSAGES);
+        if (Objects.equals(gameRuleValue, false)) {
             logger().debug("Skipping displaying death message, disabled by gamerule");
             return;
         }
@@ -53,7 +58,6 @@ public class BukkitDeathListener extends AbstractBukkitListener<PlayerDeathEvent
         String message = event.getDeathMessage();
         MinecraftComponent component = message == null ? null : ComponentUtil.toAPI(BukkitComponentSerializer.legacy().deserialize(message));
 
-        DiscordSRVPlayer player = discordSRV.playerProvider().player(event.getEntity());
         discordSRV.eventBus().publish(
                 new DeathMessagePreProcessEvent(
                         event,
@@ -70,5 +74,10 @@ public class BukkitDeathListener extends AbstractBukkitListener<PlayerDeathEvent
     @Override
     protected void observeEvents(boolean enable) {
         observer = observeEvent(observer, PlayerDeathEvent.class, event -> event.getDeathMessage() == null, enable);
+    }
+
+    @Override
+    protected void collectRelevantHandlerLists(Consumer<Class<?>> eventClassConsumer) {
+        eventClassConsumer.accept(PlayerDeathEvent.class);
     }
 }
