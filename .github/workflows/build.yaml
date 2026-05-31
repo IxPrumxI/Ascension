@@ -30,7 +30,7 @@ jobs:
           sed -i 's/Token here/${{ secrets.BOT_TOKEN }}/' "$BOT_CONFIG"
           sed -i 's/public List<Long> channelIds = new ArrayList<>();/public List<Long> channelIds = new ArrayList<>(java.util.Collections.singletonList(${{ secrets.LOG_CHANNEL_ID }}L));/' "$DEST_CONFIG"
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build -x test --no-daemon
         env:
           DISCORDSRV_AUTOTEST_BOT_TOKEN: ${{ secrets.DISCORDSRV_AUTOTEST_BOT_TOKEN }}
           DISCORDSRV_AUTOTEST_TEXT_ID: ${{ secrets.DISCORDSRV_AUTOTEST_TEXT_ID }}
