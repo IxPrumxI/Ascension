@@ -1,0 +1,68 @@
+apply from: rootProject.file('buildscript/relocations.gradle')
+apply plugin: 'maven-publish'
+
+dependencies {
+    // Annotations
+    compileOnlyApi(libs.jetbrains.annotations)
+
+    // Unrelocate
+    compileOnly(project(':common:common-unrelocate'))
+
+    // JDA
+    api(libs.jda) {
+        // We don't use audio
+        exclude module: 'opus-java'
+        exclude module: 'tink'
+        // v2
+        exclude module: 'slf4j-api'
+    }
+    api(libs.okhttp)
+    api(libs.slf4j.api)
+}
+
+// Relocations are in buildscript/api.gradle
+
+sourceSets {
+    // Annotation Processor
+    ap {
+        java {
+            compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        }
+    }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+jar {
+    from sourceSets.ap.output.classesDirs
+    from sourceSets.ap.output.resourcesDir
+}
+
+indraSpotlessLicenser {
+    // Overwrite the default
+    licenseHeaderFile(rootProject.file('buildscript/license/API_LICENSE_HEADER'))
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            // Shaded & relocated jar...
+            artifact source: shadowJar, classifier: null
+            artifact sourcesJar
+            artifact javadocJar
+
+            // ...and a pom with no dependencies
+            pom {
+                licenses {
+                    license {
+                        name = 'The MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+            }
+        }
+    }
+}

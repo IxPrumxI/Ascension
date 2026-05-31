@@ -1,0 +1,84 @@
+/*
+ * This file is part of DiscordSRV, licensed under the GPLv3 License
+ * Copyright (c) 2016-2026 Austin "Scarsz" Shapiro, Henri "Vankka" Schubin and DiscordSRV contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.discordsrv.common.core.eventbus;
+
+import com.discordsrv.api.eventbus.Subscribe;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
+
+public class AnnotationEventListener<E> extends AbstractEventListener<E> {
+
+    private final Object listener;
+    private final Class<?> listenerClass;
+    private final Subscribe annotation;
+    private final Method method;
+    private final MethodHandle handle;
+
+    public AnnotationEventListener(
+            Object listener,
+            Class<?> listenerClass,
+            Subscribe annotation,
+            Class<E> eventClass,
+            Method method,
+            MethodHandle handle
+    ) {
+        super(eventClass, annotation.ignoreCancelled(), annotation.ignoreProcessed(), annotation.priority());
+        this.listener = listener;
+        this.listenerClass = listenerClass;
+        this.annotation = annotation;
+        this.method = method;
+        this.handle = handle;
+    }
+
+    public Subscribe annotation() {
+        return annotation;
+    }
+
+    public Object listenerObject() {
+        return listener;
+    }
+
+    public Method listenerMethod() {
+        return method;
+    }
+
+    public String listenerClassName() {
+        return listenerClass.getName();
+    }
+
+    public String listenerMethodName() {
+        return method.getName();
+    }
+
+    public MethodHandle handle() {
+        return handle;
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotationEventListener{" + listenerClassName() + "#" + listenerMethodName() + "}";
+    }
+
+    @Override
+    public void invoke(E event) throws Throwable {
+        Object listener = listenerObject();
+        handle().invoke(listener, event);
+    }
+}

@@ -1,0 +1,100 @@
+/*
+ * This file is part of DiscordSRV, licensed under the GPLv3 License
+ * Copyright (c) 2016-2026 Austin "Scarsz" Shapiro, Henri "Vankka" Schubin and DiscordSRV contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.discordsrv.common.permission.game;
+
+public enum Permissions implements Permission {
+
+    // Commands
+    // Admin
+    COMMAND_BYPASS("command.bypass", true),
+    COMMAND_DEBUG("command.debug", true),
+    COMMAND_PARSE("command.parse", true),
+    COMMAND_RELOAD("command.reload", true),
+    COMMAND_BROADCAST("command.broadcast", true),
+    COMMAND_RESYNC("command.resync", true),
+    COMMAND_VERSION("command.version", true),
+    COMMAND_LINK_OTHER("command.link.other", true),
+    COMMAND_LINKED_OTHER("command.linked.other", true),
+    COMMAND_UNLINK_OTHER("command.unlink.other", true),
+
+    // Player
+    COMMAND_ROOT("command.root", false),
+    COMMAND_HELP("command.help", false),
+    COMMAND_LINK("command.link.self", false),
+    COMMAND_LINKED("command.linked.self", false),
+    COMMAND_UNLINK("command.unlink.self", false),
+
+    // Mentions
+    MENTION_USER_ALL("mention.user.all", true),
+    MENTION_USER_LOOKUP("mention.user.lookup", true),
+    MENTION_ROLE_MENTIONABLE("mention.role.mentionable", true),
+    MENTION_ROLE_ALL("mention.role.all", true),
+    MENTION_EVERYONE("mention.everyone", true),
+
+    // Misc
+    UPDATE_NOTIFICATION("updatenotification", true),
+    SILENT_JOIN("silentjoin", true),
+    SILENT_QUIT("silentquit", true),
+    ;
+
+    // Register dynamic permissions here, with any node for NeoForge support.
+    static {
+        Permission.of("mention.role", "id");
+    }
+
+    private final String permission;
+    private final String node;
+    private final boolean requiresOpByDefault;
+
+    Permissions(String permission, boolean requiresOpByDefault) {
+        this(permission, null, requiresOpByDefault);
+    }
+
+    Permissions(String permission, String node, boolean requiresOpByDefault) {
+        this.permission = permission;
+        this.node = node;
+        this.requiresOpByDefault = requiresOpByDefault;
+
+        allPermissions.add(this);
+    }
+
+    @Override
+    public String permission() {
+        return PERMISSION_PREFIX + permission;
+    }
+
+    @Override
+    public String strippedPermission() {
+        return permission;
+    }
+
+    @Override
+    public String node() {
+        return node;
+    }
+
+    /**
+     * If a given permission's default should be OP, rather than being granted by default.
+     * @return {@code true} if the permission should be restricted to, at least OPs
+     */
+    @Override
+    public boolean requiresOpByDefault() {
+        return requiresOpByDefault;
+    }
+}

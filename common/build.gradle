@@ -1,0 +1,130 @@
+import dev.vankka.dependencydownload.task.GenerateDependencyDownloadResourceTask
+
+configurations {
+    // Dependencies to exclude from runtime downloaded jars
+    runtimeDownloadExclude {
+        extendsFrom runtimeExclude
+    }
+
+    hikariOnly
+    hikari.extendsFrom hikariOnly, runtimeDownloadExclude
+
+    h2DriverOnly
+    h2Driver.extendsFrom h2DriverOnly, runtimeDownloadExclude
+
+    mysqlDriverOnly
+    mysqlDriver.extendsFrom mysqlDriverOnly, runtimeDownloadExclude
+
+    mariadbDriverOnly
+    mariadbDriver.extendsFrom mariadbDriverOnly, runtimeDownloadExclude
+
+    mcAuthLibOnly
+    mcAuthLib.extendsFrom mcAuthLibOnly, runtimeDownloadExclude
+
+    compileOnly.extendsFrom hikariOnly, h2DriverOnly, mysqlDriverOnly, mariadbDriverOnly, mcAuthLibOnly
+    testRuntimeOnly.extendsFrom runtimeDownloadOnly
+}
+
+tasks.register('generateResourceForHikari', GenerateDependencyDownloadResourceTask) {
+    var conf = configurations.hikari
+    configuration = conf
+    file = 'dependencies/' + conf.name + '.txt'
+}
+tasks.register('generateResourceForH2Driver', GenerateDependencyDownloadResourceTask) {
+    var conf = configurations.h2Driver
+    configuration = conf
+    file = 'dependencies/' + conf.name + '.txt'
+}
+tasks.register('generateResourceForMySQLDriver', GenerateDependencyDownloadResourceTask) {
+    var conf = configurations.mysqlDriver
+    configuration = conf
+    file = 'dependencies/' + conf.name + '.txt'
+}
+tasks.register('generateResourceForMariaDBDriver', GenerateDependencyDownloadResourceTask) {
+    var conf = configurations.mariadbDriver
+    configuration = conf
+    file = 'dependencies/' + conf.name + '.txt'
+}
+tasks.register('generateResourceForMCAuthLib', GenerateDependencyDownloadResourceTask) {
+    var conf = configurations.mcAuthLib
+    configuration = conf
+    file = 'dependencies/' + conf.name + '.txt'
+}
+
+dependencies {
+    // API
+    annotationProcessor project(':api')
+    compileOnlyApi project(':common:common-api')
+    testImplementation project(':common:common-api')
+
+    // Unrelocate
+    compileOnlyApi project(':common:common-unrelocate')
+
+    // DependencyDownload
+    api(libs.dependencydownload.runtime)
+
+    // Apache Commons
+    runtimeDownloadApi(libs.commons.lang)
+    runtimeDownloadApi(libs.commons.io)
+
+    // Caffeine
+    runtimeDownloadApi(libs.caffeine)
+
+    // DynamicProxy
+    compileOnlyApi(libs.dynamicproxy.api)
+    runtimeDownloadApi(libs.dynamicproxy.runtime)
+
+    // Jackson (transitive in :api)
+    compileOnlyApi(libs.jackson.databind)
+
+    // Config
+    runtimeDownloadApi(libs.configurate.yaml)
+    runtimeDownloadApi(libs.configurate.jackson)
+
+    // Logging
+    compileOnly(libs.log4j.core)
+
+    // Adventure, ANSI (version upgrade for serializer), MCDiscordReserializer, EnhancedLegacyText
+    runtimeDownloadApi(libs.adventure.api)
+    runtimeDownloadApi(libs.adventure.serializer.plain)
+    runtimeDownloadApi(libs.adventure.serializer.legacy)
+    runtimeDownloadApi(libs.adventure.serializer.gson)
+    runtimeDownloadApi(libs.adventure.serializer.ansi) {
+        // Downgrade due to jar-relocator incompatibility
+        exclude module: 'ansi'
+    }
+    runtimeDownloadApi(libs.kyori.ansi)
+    runtimeDownloadApi(libs.mcdiscordreserializer)
+    runtimeDownloadApi(libs.enhancedlegacytext)
+
+    // Database
+    hikariOnly(libs.hikaricp)
+    h2DriverOnly(libs.h2)
+    mysqlDriverOnly(libs.mysql)
+    mariadbDriverOnly(libs.mariadb)
+
+    // MinecraftAuthentication library
+    mcAuthLibOnly(libs.minecraftauth.lib) {
+        // JUnit is a testing library
+        exclude group: 'junit', module: 'junit'
+    }
+
+    // Brigadier
+    compileOnlyApi(libs.brigadier)
+
+    // Integrations
+    compileOnlyApi(libs.luckperms)
+}
+
+processResources {
+    dependsOn(
+            generateRuntimeDownloadResourceForRuntimeDownloadOnly,
+            generateResourceForHikari,
+            generateResourceForH2Driver,
+            generateResourceForMySQLDriver,
+            generateResourceForMariaDBDriver,
+            generateResourceForMCAuthLib
+    )
+}
+
+// Relocations in buildscript/relocations.gradle

@@ -1,0 +1,28 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+apply plugin: 'xyz.jpenilla.run-waterfall'
+apply from: rootProject.file('buildscript/loader.gradle')
+
+dependencies {
+    // API
+    implementation project(':common:common-api')
+
+    // DependencyDownload
+    implementation(libs.mcdependencydownload.bungee.loader)
+}
+
+processResources {
+    filter(ReplaceTokens, tokens: ['VERSION': project.version])
+}
+
+shadowJar {
+    archiveBaseName = 'DiscordSRV-Bungee'
+}
+
+tasks {
+    runWaterfall {
+        waterfallVersion("1.20")
+    }
+}
+
+// buildscript/loader.gradle includes the jarinjar in the jar

@@ -1,0 +1,20 @@
+// Buildscript for loaders & standalone platforms
+
+tasks.register('copyOutput', Copy) {
+    from(this.shadowJar)
+    into rootProject.file('jars')
+}
+
+shadowJar {
+    // Adds the commit for snapshots to the end of the file name
+    archiveClassifier = tasks.jar.archiveClassifier
+
+    // Include the license in the jar
+    from(rootProject.file('LICENSE')) {
+        rename { fileName -> 'LICENSE.txt' }
+    }
+
+    if (['modded', 'neoforge'].intersect([it.project.name, it.project.parent.name]).isEmpty()) {
+        finalizedBy copyOutput
+    }
+}

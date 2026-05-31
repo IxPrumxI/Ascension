@@ -1,0 +1,24 @@
+plugins {
+    id 'application'
+}
+
+// Don't need to be versioned, so we remove the version here to reduce the complexity of the CI
+version = null
+
+dependencies {
+    implementation(project(':common:common-api'))
+    implementation(project(':common'))
+
+    // Depend on all platforms for configs
+    implementation(project(':bukkit:bukkit-shared')) { transitive = false }
+    implementation(project(':bungee')) { transitive = false }
+    implementation(project(':velocity')) { transitive = false }
+    implementation(project(path: ':modded:1.21.11-fabric', configuration: "shadow")) { transitive = false }
+
+    api(libs.configurate.yaml)
+    api(libs.configurate.jackson)
+}
+
+application {
+    mainClass = 'com.discordsrv.config.DiscordSRVTranslation'
+}

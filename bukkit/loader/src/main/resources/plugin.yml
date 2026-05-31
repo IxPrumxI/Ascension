@@ -1,0 +1,18 @@
+name: DiscordSRV-Ascension
+main: com.discordsrv.bukkit.loader.DiscordSRVBukkitLoader
+version: @VERSION@
+description: ""
+authors: [Scarsz, Vankka]
+load: STARTUP
+
+# Marks the plugin non-legacy in versions 1.13 and above
+# This does not mean that the plugin only supports 1.13
+api-version: 1.13
+
+# Dependencies are added in code, and only if needed, unless the below line is uncommented
+# softdepend: [disable-auto-depend]
+
+commands:
+  discordsrv:
+    aliases: [dsrv]
+    description: "DiscordSRV's primary command"

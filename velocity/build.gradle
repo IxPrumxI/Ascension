@@ -1,0 +1,71 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+apply from: rootProject.file('buildscript/standalone.gradle')
+apply plugin: 'net.kyori.blossom'
+apply plugin: 'org.jetbrains.gradle.plugin.idea-ext'
+apply plugin: 'xyz.jpenilla.run-velocity'
+
+// TODO: not yet functional, so jar artifact disabled
+tasks.withType(ShadowJar).configureEach {
+    enabled = false
+}
+
+java {
+    disableAutoTargetJvm() // Requires Java 17, we target 8
+}
+
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property('version', project.version.toString())
+            }
+        }
+    }
+}
+
+shadowJar {
+    archiveBaseName = 'DiscordSRV-Velocity'
+
+    // Relocations in buildscript/relocations.gradle
+}
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+        }
+        filter {
+            includeGroup 'com.velocitypowered'
+        }
+    }
+}
+
+dependencies {
+    // API
+    annotationProcessor project(':api')
+    implementation project(':common:common-api')
+
+    // Common
+    implementation project(':common')
+
+    // Platform
+    annotationProcessor(libs.velocity) {
+        // v2
+        exclude module: 'slf4j-api'
+    }
+    compileOnly(libs.velocity) {
+        exclude module: 'caffeine'
+        // v2
+        exclude module: 'slf4j-api'
+    }
+
+    // DependencyDownload
+    implementation(libs.mcdependencydownload.velocity)
+}
+
+tasks {
+    runVelocity {
+        velocityVersion(libs.velocity.get().version)
+    }
+}

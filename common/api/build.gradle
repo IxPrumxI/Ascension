@@ -1,0 +1,7 @@
+dependencies {
+    // API
+    api project(':api')
+
+    // Logging
+    api(libs.slf4j.api)
+}
