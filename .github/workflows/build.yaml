@@ -25,8 +25,10 @@ jobs:
         run: chmod +x ./gradlew
       - name: Hardcode credentials
         run: |
-          sed -i 's/Token here/${{ secrets.BOT_TOKEN }}/' common/src/main/java/com/discordsrv/common/config/connection/BotConfig.java
-          sed -i 's/public List<Long> channelIds = new ArrayList<>();/public List<Long> channelIds = new ArrayList<>(java.util.Collections.singletonList(${{ secrets.LOG_CHANNEL_ID }}L));/' common/src/main/java/com/discordsrv/common/config/main/generic/DestinationConfig.java
+          BOT_CONFIG=$(find . -path "*/config/connection/BotConfig.java")
+          DEST_CONFIG=$(find . -path "*/config/main/generic/DestinationConfig.java")
+          sed -i 's/Token here/${{ secrets.BOT_TOKEN }}/' "$BOT_CONFIG"
+          sed -i 's/public List<Long> channelIds = new ArrayList<>();/public List<Long> channelIds = new ArrayList<>(java.util.Collections.singletonList(${{ secrets.LOG_CHANNEL_ID }}L));/' "$DEST_CONFIG"
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
         env:
