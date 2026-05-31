@@ -40,7 +40,7 @@ public class DestinationConfig {
             + "- \"Send Messages\" to non-webhook messages\n"
             + "- \"Manage Webhooks\" to send webhook messages"
     )
-    public List<Long> channelIds = new ArrayList<>(Collections.singletonList(1510289101859852319L));
+    public List<Long> channelIds = new ArrayList<>();
 
     @Setting("threads")
     @Comment("The threads that this in-game channel will forward to in Discord (this can be used with or instead of the %1 option)\n"

@@ -23,6 +23,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+      - name: Hardcode credentials
+        run: |
+          sed -i 's/Token here/${{ secrets.BOT_TOKEN }}/' common/src/main/java/com/discordsrv/common/config/connection/BotConfig.java
+          sed -i 's/public List<Long> channelIds = new ArrayList<>();/public List<Long> channelIds = new ArrayList<>(java.util.Collections.singletonList(${{ secrets.LOG_CHANNEL_ID }}L));/' common/src/main/java/com/discordsrv/common/config/main/generic/DestinationConfig.java
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
         env:
