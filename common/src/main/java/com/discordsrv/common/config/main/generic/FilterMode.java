@@ -16,22 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.discordsrv.common.config.helper;
+package com.discordsrv.common.config.main.generic;
 
-import com.discordsrv.api.discord.entity.message.SendableDiscordMessage;
+public enum FilterMode {
+    WHITELIST,
+    BLACKLIST;
 
-/**
- * Safer alternative to directly using {@link SendableDiscordMessage.Builder} in the config classes.
- */
-public class SendableDiscordMessageTemplate {
-
-    private final SendableDiscordMessage.Builder builder;
-
-    public SendableDiscordMessageTemplate(SendableDiscordMessage.Builder builder) {
-        this.builder = builder;
-    }
-
-    public SendableDiscordMessage.Builder use() {
-        return builder.clone();
+    public boolean isWhitelist() {
+        return this == WHITELIST;
     }
 }

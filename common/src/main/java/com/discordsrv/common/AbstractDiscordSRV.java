@@ -71,7 +71,6 @@ import com.discordsrv.common.core.storage.impl.MemoryStorage;
 import com.discordsrv.common.core.update.UpdateChecker;
 import com.discordsrv.common.discord.api.DiscordAPIEventModule;
 import com.discordsrv.common.discord.api.DiscordAPIImpl;
-import com.discordsrv.common.discord.connection.DiscordConnectionManager;
 import com.discordsrv.common.discord.connection.details.DiscordConnectionDetailsImpl;
 import com.discordsrv.common.discord.connection.jda.JDAConnectionManager;
 import com.discordsrv.common.events.lifecycle.ServerStartedEvent;
@@ -87,11 +86,7 @@ import com.discordsrv.common.feature.channel.global.GlobalChannelLookupModule;
 import com.discordsrv.common.feature.console.ConsoleModule;
 import com.discordsrv.common.feature.customcommands.CustomCommandModule;
 import com.discordsrv.common.feature.groupsync.GroupSyncModule;
-import com.discordsrv.common.feature.linking.LinkProvider;
-import com.discordsrv.common.feature.linking.LinkedRoleModule;
-import com.discordsrv.common.feature.linking.LinkPesteringModule;
-import com.discordsrv.common.feature.linking.LinkingModule;
-import com.discordsrv.common.feature.linking.LinkingRewardsModule;
+import com.discordsrv.common.feature.linking.*;
 import com.discordsrv.common.feature.linking.impl.MinecraftAuthenticationLinker;
 import com.discordsrv.common.feature.linking.impl.StorageLinker;
 import com.discordsrv.common.feature.mention.cache.MentionCachingModule;
@@ -108,6 +103,7 @@ import com.discordsrv.common.helper.TemporaryLocalData;
 import com.discordsrv.common.helper.VanishStatusTrackingModule;
 import com.discordsrv.common.logging.adapter.DependencyLoggerAdapter;
 import com.discordsrv.common.util.ApiInstanceUtil;
+import com.discordsrv.common.util.ComponentUtil;
 import com.discordsrv.common.util.GitIgnoreUtil;
 import com.discordsrv.common.util.UUIDUtil;
 import com.discordsrv.common.util.function.CheckedFunction;
@@ -558,7 +554,7 @@ public abstract class AbstractDiscordSRV<
         if (config != null) {
             String defaultLanguage = config.messages.defaultLanguage;
             if (StringUtils.isNotBlank(defaultLanguage)) {
-                return Locale.forLanguageTag(defaultLanguage);
+                return ComponentUtil.extractLocale(defaultLanguage);
             }
         }
 
@@ -988,7 +984,7 @@ public abstract class AbstractDiscordSRV<
 
         if (flags.contains(ReloadFlag.DISCORD_CONNECTION)) {
             // Shutdown will not fail even if not connected
-            discordConnectionManager.shutdown(DiscordConnectionManager.DEFAULT_SHUTDOWN_TIMEOUT);
+            discordConnectionManager.shutdown();
 
             discordConnectionManager.connect();
             if (!initial) {
@@ -1004,6 +1000,7 @@ public abstract class AbstractDiscordSRV<
             results.addAll(moduleManager().reload());
         }
 
+        componentFactory().updateDefaultLocate(); // Update the default language everytime
         if (flags.contains(ReloadFlag.TRANSLATION)) {
             this.translationLoader.reload();
         }

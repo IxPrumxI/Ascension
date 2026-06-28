@@ -18,6 +18,9 @@
 
 package com.discordsrv.modded.player;
 
+import com.discordsrv.api.eventbus.EventPriorities;
+import com.discordsrv.api.eventbus.Subscribe;
+import com.discordsrv.api.events.placeholder.PlaceholderContextMappingEvent;
 import com.discordsrv.common.abstraction.player.provider.AbstractPlayerProvider;
 import com.discordsrv.modded.ModdedDiscordSRV;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,13 +43,20 @@ public class ModdedPlayerProvider extends AbstractPlayerProvider<ModdedPlayer, M
         INSTANCE = this;
     }
 
+    @Subscribe(priority = EventPriorities.EARLIEST)
+    public void onPlaceholderContextMapping(PlaceholderContextMappingEvent event) {
+        event.map(ServerPlayer.class, this::player);
+    }
+
     @Override
     public void subscribe() {
+        discordSRV.eventBus().subscribe(this);
         enabled = true;
     }
 
     @Override
     public void unsubscribe() {
+        discordSRV.eventBus().unsubscribe(this);
         enabled = false;
     }
 
