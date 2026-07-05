@@ -4,6 +4,10 @@ plugins {
 
 apply from: rootProject.file('buildscript/relocations.gradle')
 
+java {
+    disableAutoTargetJvm() // Adventure V5 requires Java 21, we target 8
+}
+
 // Don't need to be versioned, so we remove the version here to reduce the complexity of the CI
 version = null
 

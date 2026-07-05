@@ -9,6 +9,10 @@
 apply from: rootProject.file('buildscript/runtime.gradle')
 
 allprojects {
+    java {
+        disableAutoTargetJvm() // Adventure V5 requires Java 21, we target 8
+    }
+
     repositories {
         exclusiveContent {
             forRepository {

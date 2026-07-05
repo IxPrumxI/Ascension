@@ -1,4 +1,8 @@
 allprojects {
+    java {
+        disableAutoTargetJvm() // Adventure V5 requires Java 21, we target 8
+    }
+
     repositories {
         maven { url = 'https://repo.papermc.io/repository/maven-public/' }
     }

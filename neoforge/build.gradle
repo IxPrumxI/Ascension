@@ -5,22 +5,26 @@ plugins {
 apply from: rootProject.file('buildscript/relocations.gradle')
 apply from: rootProject.file('buildscript/final.gradle')
 
+var minecraftVersion = sc.current.version.toString().split("-")[0]
+var stonecutterNode = rootProject.findProject("modded").subprojects.find { it.name == project.name }
+var is26_1 = sc.eval(minecraftVersion, ">=26.1") // Obfuscated vs Unobfuscated versions.
+
 configurations.configureEach {
     resolutionStrategy {
         force "org.slf4j:slf4j-api:1.7.36"
         force "dev.vankka:dependencydownload-runtime:2.0.0"
+        if (sc.eval(minecraftVersion, ">=1.21.1 <=1.21.9")) { // Introduced by NeoForge in 1.21.1
+            force "com.google.code.gson:gson:2.11.0"
+        }
     }
 }
-
-var minecraftVersion = sc.current.version.toString().split("-")[0]
-var stonecutterNode = rootProject.findProject("modded").subprojects.find { it.name == project.name }
-var is26_1 = sc.eval(minecraftVersion, ">=26.1") // Obfuscated vs Unobfuscated versions.
 
 java {
     var java = stonecutterNode.java.targetCompatibility
 
     targetCompatibility = java
     sourceCompatibility = java
+    disableAutoTargetJvm() // Adventure V5 requires Java 21
 }
 
 sourceSets {

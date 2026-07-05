@@ -1,3 +1,7 @@
+java {
+    disableAutoTargetJvm() // Adventure V5 requires Java 21, we target 8
+}
+
 dependencies {
     compileOnlyApi(libs.slf4j.api)
     compileOnlyApi(libs.adventure.api)
