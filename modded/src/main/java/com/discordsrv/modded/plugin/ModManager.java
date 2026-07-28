@@ -90,4 +90,27 @@ public class ModManager implements PluginManager {
          ^///?}
     }
     *///?}
+
+    //? if forge {
+    /*@Override
+    public boolean isPluginEnabled(String modIdentifier) {
+        return net.minecraftforge.fml.ModList.get().getMods().stream().anyMatch(modInfo -> modInfo.getModId().equalsIgnoreCase(modIdentifier));
+    }
+
+    @Override
+    public List<Plugin> getPlugins() {
+        return net.minecraftforge.fml.ModList.get().getMods().stream()
+                .map(modInfo -> {
+                    String id = modInfo.getModId();
+                    return new Plugin(
+                            id,
+                            modInfo.getDisplayName(),
+                            modInfo.getVersion().toString(),
+                            null
+                    );
+                })
+                .collect(Collectors.toList());
+
+    }
+    *///?}
 }

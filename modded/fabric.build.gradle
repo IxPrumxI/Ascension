@@ -28,6 +28,7 @@ sourceSets {
     main {
         java {
             exclude "com/discordsrv/neoforge/**"
+            exclude "com/discordsrv/forge/**"
         }
     }
 }
@@ -147,7 +148,7 @@ dependencies {
     loomx.applyMojangMappings()
 
     // Mixin Extras
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.2"))
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4"))
 
     // API
     annotationProcessor project(':api')
@@ -159,7 +160,7 @@ dependencies {
     runtimeDownload(libs.adventure.api)
 
     compileOnly("net.fabricmc:fabric-loader:${project.property("deps.fabric_loader")}")
-    include(implementation("io.github.llamalad7:mixinextras-fabric:0.5.2"))
+    include(implementation("io.github.llamalad7:mixinextras-fabric:0.5.4"))
 
     // Fabric API
     Set<String> apiModules = [

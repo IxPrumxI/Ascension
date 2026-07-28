@@ -66,6 +66,9 @@ public class ModdedCommandSender implements ICommandSender, ForwardingAudience.S
             ^///?}
         }
         *///?}
+
+        //? if forge
+        return true;
     }
 
     @Override

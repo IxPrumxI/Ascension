@@ -42,6 +42,9 @@ public class ModdedQuitModule extends AbstractModdedModule {
 
         //? if neoforge
         //net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(this::onDisconnect);
+
+        //? if forge
+        //net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(this::onDisconnect);
     }
 
     //? if fabric {
@@ -55,6 +58,12 @@ public class ModdedQuitModule extends AbstractModdedModule {
 
         ServerPlayer player = (ServerPlayer) trigger.getEntity();
     *///? }
+    //? if forge {
+    /*private void onDisconnect(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent trigger) {
+        if (!enabled) return;
+
+        ServerPlayer player = (ServerPlayer) trigger.getEntity();
+    *///?}
 
         MinecraftComponent component = discordSRV.componentFactory().toAPI(net.minecraft.network.chat.Component.translatable("multiplayer.player.left", player.getDisplayName()).withStyle(ChatFormatting.YELLOW));
         discordSRV.eventBus().publish(

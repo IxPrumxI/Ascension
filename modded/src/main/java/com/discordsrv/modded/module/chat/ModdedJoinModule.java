@@ -43,6 +43,9 @@ public class ModdedJoinModule extends AbstractModdedModule {
 
         //? if neoforge
         //net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(this::onJoin);
+
+        //? if forge
+        //net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(this::onJoin);
     }
 
     //? if fabric {
@@ -56,6 +59,13 @@ public class ModdedJoinModule extends AbstractModdedModule {
 
         ServerPlayer playerEntity = (ServerPlayer) trigger.getEntity();
     *///? }
+    //? if forge {
+    /*private void onJoin(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent trigger) {
+        if (!enabled) return;
+
+        ServerPlayer playerEntity = (ServerPlayer) trigger.getEntity();
+    *///? }
+
         boolean firstJoin = playerEntity.getStats().getValue(Stats.CUSTOM.get(Stats.LEAVE_GAME)) == 0;
 
         MinecraftComponent component;
