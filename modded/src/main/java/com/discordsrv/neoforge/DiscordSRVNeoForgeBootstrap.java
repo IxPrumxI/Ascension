@@ -23,10 +23,12 @@ import com.discordsrv.common.core.logging.Logger;
 import com.discordsrv.common.core.logging.backend.impl.Log4JLoggerImpl;
 import com.discordsrv.modded.DiscordSRVModdedBootstrap;
 import com.discordsrv.modded.util.ClassLoaderUtils;
+import com.mojang.brigadier.CommandDispatcher;
 import dev.vankka.dependencydownload.classpath.ClasspathAppender;
 import dev.vankka.dependencydownload.jarinjar.bootstrap.AbstractBootstrap;
 import dev.vankka.dependencydownload.jarinjar.bootstrap.classpath.JarInJarClasspathAppender;
 import dev.vankka.dependencydownload.jarinjar.classloader.JarInJarClassLoader;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -141,6 +143,11 @@ public class DiscordSRVNeoForgeBootstrap extends AbstractBootstrap implements Di
 
     public MinecraftServer getServer() {
         return minecraftServer;
+    }
+
+    @Override
+    public CommandDispatcher<CommandSourceStack> getCommandDispatcher() {
+        return minecraftServer.getCommands().getDispatcher();
     }
 
     public NeoForgeDiscordSRV getDiscordSRV() {

@@ -41,7 +41,7 @@ public class ModdedGameCommandExecutionHelper implements GameCommandExecutionHel
 
     public ModdedGameCommandExecutionHelper(ModdedDiscordSRV discordSRV) {
         this.discordSRV = discordSRV;
-        this.dispatcher = discordSRV.getServer().getCommands().getDispatcher();
+        this.dispatcher = discordSRV.bootstrap().getCommandDispatcher();
     }
 
     @Override

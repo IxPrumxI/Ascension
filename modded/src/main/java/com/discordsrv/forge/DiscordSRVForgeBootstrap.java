@@ -21,14 +21,18 @@ package com.discordsrv.forge;
 import com.discordsrv.common.abstraction.bootstrap.LifecycleManager;
 import com.discordsrv.common.core.logging.Logger;
 import com.discordsrv.common.core.logging.backend.impl.Log4JLoggerImpl;
+import com.discordsrv.forge.util.ForgeEventBusFacade;
 import com.discordsrv.modded.DiscordSRVModdedBootstrap;
 import com.discordsrv.modded.util.ClassLoaderUtils;
+import com.mojang.brigadier.CommandDispatcher;
 import dev.vankka.dependencydownload.classpath.ClasspathAppender;
 import dev.vankka.dependencydownload.jarinjar.bootstrap.AbstractBootstrap;
 import dev.vankka.dependencydownload.jarinjar.bootstrap.classpath.JarInJarClasspathAppender;
 import dev.vankka.dependencydownload.jarinjar.classloader.JarInJarClassLoader;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -41,7 +45,6 @@ import org.apache.logging.log4j.LogManager;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Optional;
 
 public class DiscordSRVForgeBootstrap extends AbstractBootstrap implements DiscordSRVModdedBootstrap {
     private final static String DEPENDENCIES_RUNTIME = /*$ dependencies_file*/"dependencies/runtimeDownload-1.20.1-forge.txt";
@@ -52,20 +55,28 @@ public class DiscordSRVForgeBootstrap extends AbstractBootstrap implements Disco
 
     private JarInJarClasspathAppender classpathAppender;
     private ModContainer modContainer;
-    private IEventBus eventBus;
+    private IEventBus modEventBus;
     private MinecraftServer minecraftServer;
     private ForgeDiscordSRV discordSRV;
 
-    public DiscordSRVForgeBootstrap(JarInJarClassLoader classLoader, ModContainer modContainer, IEventBus eventBus) {
+    private CommandDispatcher<CommandSourceStack> commandDispatcher;
+
+    /**
+     * A facade for the forge event bus, compatible with LP's jar-in-jar packaging
+     */
+    private final ForgeEventBusFacade eventBus;
+
+    public DiscordSRVForgeBootstrap(JarInJarClassLoader classLoader, ModContainer modContainer, IEventBus modEventBus) {
         super(classLoader);
         ClassLoaderUtils.setClassLoader(classLoader);
 
         this.classpathAppender = new JarInJarClasspathAppender(classLoader);
         this.modContainer = modContainer;
-        this.eventBus = eventBus;
+        this.modEventBus = modEventBus;
+        this.eventBus = new ForgeEventBusFacade();
 
         this.logger = new Log4JLoggerImpl(LogManager.getLogger("DiscordSRV"));
-        this.dataDirectory = FMLPaths.CONFIGDIR.get().resolve("discordsrv");
+        this.dataDirectory = FMLPaths.CONFIGDIR.get().resolve("DiscordSRV");
 
         try {
             this.lifecycleManager = new LifecycleManager(
@@ -79,7 +90,12 @@ public class DiscordSRVForgeBootstrap extends AbstractBootstrap implements Disco
         }
         this.minecraftServer = null;
 
-        MinecraftForge.EVENT_BUS.register(this);
+        this.eventBus.register(this);
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event) {
+        this.commandDispatcher = event.getDispatcher();
     }
 
     @SubscribeEvent()
@@ -135,6 +151,11 @@ public class DiscordSRVForgeBootstrap extends AbstractBootstrap implements Disco
 
     public MinecraftServer getServer() {
         return minecraftServer;
+    }
+
+    @Override
+    public CommandDispatcher<CommandSourceStack> getCommandDispatcher() {
+        return commandDispatcher;
     }
 
     public ForgeDiscordSRV getDiscordSRV() {

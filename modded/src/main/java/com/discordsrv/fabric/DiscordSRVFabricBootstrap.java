@@ -22,8 +22,10 @@ import com.discordsrv.common.abstraction.bootstrap.LifecycleManager;
 import com.discordsrv.common.core.logging.Logger;
 import com.discordsrv.common.core.logging.backend.impl.Log4JLoggerImpl;
 import com.discordsrv.modded.DiscordSRVModdedBootstrap;
+import com.mojang.brigadier.CommandDispatcher;
 import dev.vankka.dependencydownload.classpath.ClasspathAppender;
 import dev.vankka.mcdependencydownload.fabric.classpath.FabricClasspathAppender;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -128,6 +130,11 @@ public class DiscordSRVFabricBootstrap implements DedicatedServerModInitializer,
 
     public MinecraftServer getServer() {
         return minecraftServer;
+    }
+
+    @Override
+    public CommandDispatcher<CommandSourceStack> getCommandDispatcher() {
+        return minecraftServer.getCommands().getDispatcher();
     }
 
     public FabricDiscordSRV getDiscordSRV() {

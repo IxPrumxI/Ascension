@@ -162,7 +162,7 @@ public class ModdedDiscordSRV extends AbstractDiscordSRV<DiscordSRVModdedBootstr
 
     @Override
     public OnlineMode onlineMode() {
-        return OnlineMode.of(getServer().usesAuthentication());
+        return OnlineMode.of(true);
     }
 
     @Override

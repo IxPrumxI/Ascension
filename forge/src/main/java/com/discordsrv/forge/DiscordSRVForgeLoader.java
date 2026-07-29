@@ -21,13 +21,15 @@ package com.discordsrv.forge;
 import dev.vankka.dependencydownload.jarinjar.classloader.JarInJarClassLoader;
 import dev.vankka.dependencydownload.jarinjar.loader.ILoader;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkConstants;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.net.URL;
-
 
 @Mod("discordsrv")
 public class DiscordSRVForgeLoader implements ILoader {
@@ -36,11 +38,21 @@ public class DiscordSRVForgeLoader implements ILoader {
     private final ModContainer modContainer;
     private final IEventBus eventBus;
 
-    public DiscordSRVForgeLoader(IEventBus eventBus, ModContainer modContainer) {
+    public DiscordSRVForgeLoader(FMLJavaModLoadingContext context) {
         super();
-        this.modContainer = modContainer;
-        this.eventBus = eventBus;
+        this.modContainer = context.getContainer();
+        this.eventBus = context.getModEventBus();
         this.classLoader = initialize();
+
+        context.registerExtensionPoint(IExtensionPoint.DisplayTest.class, (() -> new IExtensionPoint.DisplayTest(
+                () -> NetworkConstants.IGNORESERVERONLY,
+                (a, b) -> true
+        )));
+    }
+
+    @Override
+    public @NotNull ClassLoader getParentClassLoader() {
+        return getClass().getClassLoader();
     }
 
     @Override

@@ -19,8 +19,11 @@
 package com.discordsrv.modded;
 
 import com.discordsrv.common.abstraction.bootstrap.IBootstrap;
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 
 public interface DiscordSRVModdedBootstrap extends IBootstrap {
     MinecraftServer getServer();
+    CommandDispatcher<CommandSourceStack> getCommandDispatcher();
 }

@@ -63,7 +63,7 @@ public class ModdedCommandHandler implements ICommandHandler {
     public void registerCommand(GameCommand command) {
         commands.add(command);
         LiteralCommandNode<CommandSourceStack> node = BrigadierUtil.convertToBrigadier(discordSRV, command, this::getSender);
-        CommandDispatcher<CommandSourceStack> dispatcher = discordSRV.getServer().getCommands().getDispatcher();
+        CommandDispatcher<CommandSourceStack> dispatcher = discordSRV.bootstrap().getCommandDispatcher();
         if (dispatcher.getRoot().getChild(node.getName()) == null) {
             dispatcher.getRoot().addChild(node);
         }
