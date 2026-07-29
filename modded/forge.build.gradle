@@ -50,7 +50,7 @@ shadowJar {
     configurations = [project.configurations.shadow]
     mergeServiceFiles()
 
-    archiveFileName = "neoforge.jarinjar"
+    archiveFileName = "forge.jarinjar"
 }
 
 spotless {
