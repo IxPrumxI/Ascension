@@ -47,7 +47,7 @@ processResources {
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/forge.mods.toml']) {
+    filesMatching(['META-INF/mods.toml']) {
         expand replaceProperties
     }
 }
