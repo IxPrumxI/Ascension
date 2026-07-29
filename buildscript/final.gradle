@@ -14,7 +14,7 @@ shadowJar {
         rename { fileName -> 'LICENSE.txt' }
     }
 
-    if (['modded', 'neoforge'].intersect([it.project.name, it.project.parent.name]).isEmpty()) {
+    if (['modded', 'neoforge', 'forge'].intersect([it.project.name, it.project.parent.name]).isEmpty()) {
         finalizedBy copyOutput
     }
 }
