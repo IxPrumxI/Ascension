@@ -45,6 +45,8 @@ public class ModdedCommandHandler implements ICommandHandler {
         net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> registerAll(dispatcher));
         //? if neoforge
         //net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.RegisterCommandsEvent event) -> registerAll(event.getDispatcher()));
+        //? if forge
+        //net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.RegisterCommandsEvent event) -> registerAll(event.getDispatcher()));
     }
 
     private ICommandSender getSender(SharedSuggestionProvider source) {

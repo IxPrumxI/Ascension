@@ -6,6 +6,7 @@ apply from: rootProject.file('buildscript/loader.gradle')
 
 var minecraftVersion = sc.current.version.toString().split("-")[0]
 var stonecutterNode = rootProject.findProject("modded").subprojects.find { it.name == project.name }
+evaluationDependsOn(stonecutterNode.path)
 
 configurations.configureEach {
     resolutionStrategy {
@@ -53,20 +54,43 @@ processResources {
     }
 }
 
+legacyForge {
+    version = minecraftVersion + "-" + stonecutterNode.property("deps.forge_version")
+}
+
+jar {
+    manifest.attributes([
+            "MixinConfigs": "discordsrv.mixins.json"
+    ])
+}
+
+tasks.reobfJar {
+    dependsOn shadowJar
+}
+
+obfuscation.reobfuscate(tasks.named('shadowJar'), sourceSets.main) {
+    dependsOn tasks.named('shadowJar')
+
+    archiveBaseName = "DiscordSRV-Forge-${stonecutterNode.property('minecraft.version_range_label')}"
+    archiveClassifier = project.parent.jar.archiveClassifier
+
+    finalizedBy copyForge
+}
+
 tasks.register('copyForge', Copy) {
-    from this.shadowJar
+    from this.reobfShadowJar
     into rootProject.file("jars/forge")
 }
 
 shadowJar {
-    dependsOn stonecutterNode.shadowJar
+    dependsOn stonecutterNode.tasks.named("reobfShadowJar")
 
-    configurations = [project.configurations.shadow]
+    configurations = [project.configurations.shadow, project.configurations.jarJar]
     mergeServiceFiles()
 
     relocate('com.discordsrv.unrelocate.', '')
 
-    from stonecutterNode.tasks.shadowJar.archiveFile
+    from stonecutterNode.tasks.reobfShadowJar.archiveFile
     from(rootProject.project("common").sourceSets.main.output) {
         include "com/discordsrv/common/permission/game/**"
     }
@@ -76,11 +100,6 @@ shadowJar {
         include "com/discordsrv/modded/accessor/**"
         include "discordsrv.mixins.json"
     }
-
-    archiveBaseName = "DiscordSRV-Forge-${stonecutterNode.property('minecraft.version_range_label')}"
-    archiveClassifier = project.parent.jar.archiveClassifier
-
-    finalizedBy copyForge
 }
 
 spotless {
@@ -100,12 +119,9 @@ repositories {
     maven { url = "https://maven.parchmentmc.org" }
 }
 
-legacyForge {
-    version = minecraftVersion + "-" + stonecutterNode.property("deps.forge_version")
-}
-
 dependencies {
-    // Mixin Extras
+    // Mixin
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.5.4"))
 
     // Adventure

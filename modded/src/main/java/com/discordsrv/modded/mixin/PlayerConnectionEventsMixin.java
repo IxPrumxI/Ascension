@@ -23,6 +23,7 @@ import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,15 +33,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(net.minecraft.server.players.PlayerList.class)
 public class PlayerConnectionEventsMixin {
 
-    @Definition(id = "serverPlayer", local = @Local(type = ServerPlayer.class))
+    //? if !forge {
+    /*@Definition(id = "serverPlayer", local = @Local(type = ServerPlayer.class))
     @Expression("serverPlayer")
     @ModifyExpressionValue(method = "placeNewPlayer", at = @At(value = "MIXINEXTRAS:EXPRESSION", ordinal = 0)) // Target the first usage of the player inside the method.
     private ServerPlayer handlePlayerJoin(ServerPlayer player) {
+    *///? } else {
+    @Inject(method = "placeNewPlayer", at = @At("HEAD"))
+    private void handlePlayerJoin(Connection connection, ServerPlayer player, CallbackInfo ci) {
+    //? }
         MixinUtils.withClass("com.discordsrv.modded.player.ModdedPlayerProvider")
                 .withInstance()
                 .withMethod("addPlayer", player, false)
                 .execute();
-        return player;
     }
 
     @Inject(method = "remove", at = @At("HEAD"))

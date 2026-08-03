@@ -23,12 +23,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 // This file is excluded from relocations because it needs to access the original Gson instance used by Minecraft's Component serializer.
-@Mixin(targets = "net.minecraft.network.chat.Component$Serializer")
+@Mixin(net.minecraft.network.chat.Component.Serializer.class)
 public interface ComponentSerializerAccess {
 
-    //? if minecraft: <= 1.20.4 {
-    /*@Accessor static Gson getGSON() {
+    //? if minecraft: <= 1.20.4 && !forge{
+    @Accessor(value = "GSON") static Gson getGSON() {
         throw new AssertionError();
     }
-    *///?}
+    //?}
 }

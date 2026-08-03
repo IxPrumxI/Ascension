@@ -9,6 +9,7 @@
     "ban.BanCommandMixin",
     "ban.PardonCommandMixin",
     "component.ComponentSerializerAccess",
+    "component.ComponentSerializerMixin",
     "requiredlinking.CommandExecuteMixin",
     "requiredlinking.PlayerJoinCheckMixin",
     "requiredlinking.PlayerMovementMixin",
