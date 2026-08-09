@@ -66,7 +66,7 @@ public class CarbonChatIntegration extends PluginIntegration<DiscordSRV> {
             return false;
         }
 
-        if (!ComponentUtil.IS_RELOCATED) {
+        if (ComponentUtil.IS_RELOCATED) {
             logger().debug("CarbonChat integration cannot be used on a platform with Adventure relocation");
             return false;
         }
