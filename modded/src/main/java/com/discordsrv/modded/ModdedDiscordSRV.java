@@ -74,12 +74,12 @@ public class ModdedDiscordSRV extends AbstractDiscordSRV<DiscordSRVModdedBootstr
         super(bootstrap);
 
         this.scheduler = new StandardScheduler(this);
-        this.console = new ModdedConsole(this);
         this.playerProvider = new ModdedPlayerProvider(this);
         this.modManager = new ModManager();
         this.commandHandler = new ModdedCommandHandler(this);
         this.executionHelper = new ModdedGameCommandExecutionHelper(this);
         this.componentFactory = new ModdedComponentFactory(this);
+        this.console = new ModdedConsole(this);
 
         // Config
         this.connectionConfigManager = new ConnectionConfigManager<>(this, ConnectionConfig::new);
