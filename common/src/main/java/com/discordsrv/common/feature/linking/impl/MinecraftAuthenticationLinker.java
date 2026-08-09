@@ -21,7 +21,6 @@ package com.discordsrv.common.feature.linking.impl;
 import com.discordsrv.api.component.MinecraftComponent;
 import com.discordsrv.api.task.Task;
 import com.discordsrv.common.DiscordSRV;
-import com.discordsrv.common.core.logging.Logger;
 import com.discordsrv.common.core.logging.NamedLogger;
 import com.discordsrv.common.feature.linking.AccountLink;
 import com.discordsrv.common.feature.linking.LinkStore;
@@ -48,13 +47,11 @@ public class MinecraftAuthenticationLinker extends CachedLinkProvider {
     public static final String DOMAIN = "minecraftauth.me";
     public static final String BASE_LINK_URL = DiscordSRV.WEBSITE + "/link";
 
-    private final Logger logger;
     private final LinkStore linkStore;
 
     public MinecraftAuthenticationLinker(DiscordSRV discordSRV) {
-        super(discordSRV);
+        super(discordSRV, new NamedLogger(discordSRV, "MINECRAFTAUTH_LINKER"));
         this.linkStore = new StorageLinker(discordSRV);
-        this.logger = new NamedLogger(discordSRV, "MINECRAFTAUTH_LINKER");
     }
 
     @Override
