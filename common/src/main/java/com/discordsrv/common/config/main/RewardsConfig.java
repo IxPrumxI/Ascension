@@ -18,7 +18,6 @@
 
 package com.discordsrv.common.config.main;
 
-import com.discordsrv.api.placeholder.annotation.Placeholder;
 import com.discordsrv.common.config.configurate.annotation.Constants;
 import com.discordsrv.common.config.documentation.DocumentationURLs;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -33,7 +32,7 @@ public class RewardsConfig {
         rewardId = "first-link";
     }}));
 
-    @Placeholder("Boosting rewards can only be granted to players that are also linked")
+    @Comment("Boosting rewards can only be granted to players that are also linked")
     public List<BoostingReward> boostingRewards = new ArrayList<>(Collections.singleton(new BoostingReward() {{
         rewardId = "first-boost";
     }}));
