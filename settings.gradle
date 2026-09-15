@@ -81,8 +81,8 @@ dependencyResolutionManagement {
 
             // Paper
             library('paperapi-minimum', 'com.destroystokyo.paper', 'paper-api').version('1.16.5-R0.1-SNAPSHOT')
-            library('paperapi-latest', 'io.papermc.paper', 'paper-api').version('26.1.2.build.74-stable')
-            library('folia', 'dev.folia', 'folia-api').version('26.1.2.build.8-stable')
+            library('paperapi-latest', 'io.papermc.paper', 'paper-api').version('26.3.build.3-alpha')
+            library('folia', 'dev.folia', 'folia-api').version('26.2.build.7-beta')
 
             // Bungee
             library('bungee', 'net.md-5', 'bungeecord-api').version('1.21-R0.4-SNAPSHOT')
