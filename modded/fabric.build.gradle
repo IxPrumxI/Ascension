@@ -157,7 +157,7 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${minecraftVersion == "26.3" ? "26.3-pre-2" : minecraftVersion}")
+    minecraft("com.mojang:minecraft:${minecraftVersion}")
     loomx.applyMojangMappings()
 
     // Mixin Extras
